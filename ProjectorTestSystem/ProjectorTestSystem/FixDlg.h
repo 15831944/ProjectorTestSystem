@@ -47,4 +47,6 @@ public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	CButton m_FixCheck1;
 	CButton m_FixCheck2;
+	afx_msg void OnBnClickedCheck2();
+	afx_msg void OnBnClickedCheck3();
 };

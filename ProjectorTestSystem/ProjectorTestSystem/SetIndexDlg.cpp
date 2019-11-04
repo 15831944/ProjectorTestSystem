@@ -171,6 +171,7 @@ void CSetIndexDlg::OnBnClickedSave()
 	CString Indextype, SubBodyNum, SubSingleBodyNum, SubMainBoardNum, IndexName, SqlUpdate, SqlInsert,CheckSql;
 	BOOL InsertFinshFlag = FALSE;
 	int IndexCount,RecodCount;	
+	int SubSingleBodyNumLength, SubMainBoardNumLength;
 	GetDlgItemText(IDC_INDEXTYPE,Indextype);
 	GetDlgItemText(IDC_TOOLINDEX, SubBodyNum);
 	GetDlgItemText(IDC_SINGLETOOLINDEX, SubSingleBodyNum);
@@ -178,6 +179,20 @@ void CSetIndexDlg::OnBnClickedSave()
 	if (Indextype=="")
 	{
 		MessageBox(_T("前缀类型名不能为空"), _T("提示"));
+		NewIndexTypeFlag = FALSE;
+		return;
+	}
+	SubSingleBodyNumLength = SubSingleBodyNum.GetLength();
+	SubMainBoardNumLength = SubMainBoardNum.GetLength();
+	if (SubSingleBodyNumLength>15)
+	{
+		MessageBox(_T("光机码前缀位数超限，请重新输入"), _T("提示"));
+		NewIndexTypeFlag = FALSE;
+		return;
+	}
+	if (SubMainBoardNumLength>16)
+	{
+		MessageBox(_T("主板编码前缀位数超限，请重新输入"), _T("提示"));
 		NewIndexTypeFlag = FALSE;
 		return;
 	}
@@ -214,6 +229,11 @@ void CSetIndexDlg::OnBnClickedSave()
 			SqlInsert.Format(_T("insert into ProjectorInformation_EncodingRules values('%s','%s','%s','%s')"), Indextype, SubBodyNum, SubSingleBodyNum, SubMainBoardNum);
 			InsertFinshFlag = OperateDB.ExecuteByConnection(SqlInsert);
 			NewIndexTypeFlag = FALSE;
+			if (InsertFinshFlag != TRUE)
+			{
+				MessageBox(_T("保存失败，请重新修改！"), _T("提示"));
+				return;
+			}
 			MessageBox(_T("保存成功！"), _T("提示"));
 			SetDlgItemText(IDC_INDEXTYPE, "");
 			SetDlgItemText(IDC_TOOLINDEX, _T(""));
@@ -232,12 +252,16 @@ void CSetIndexDlg::OnBnClickedSave()
 				SqlInsert.Format(_T("UPDATE ProjectorInformation_EncodingRules SET Prefix_BodyCode ='%s',Prefix_OpticalCode='%s',Prefix_MotherboardEncoding='%s' WHERE TypeName = '%s'"), SubBodyNum, SubSingleBodyNum, SubMainBoardNum, Indextype);
 				InsertFinshFlag = OperateDB.ExecuteByConnection(SqlInsert);
 				NewIndexTypeFlag = FALSE;
+	          if(InsertFinshFlag!=TRUE)
+	          {
+		          MessageBox(_T("保存失败，请重新修改！"), _T("提示"));
+		          return;
+	          }
 				MessageBox(_T("保存成功！"), _T("提示"));
 				SetDlgItemText(IDC_INDEXTYPE, "");
 				SetDlgItemText(IDC_TOOLINDEX, _T(""));
 				SetDlgItemText(IDC_SINGLETOOLINDEX, _T(""));
 				SetDlgItemText(IDC_MAININDEX, _T(""));
-
 			}
 		
 		}		
@@ -292,10 +316,7 @@ void CSetIndexDlg::OnBnClickedSave()
 		m_New.EnableWindow(TRUE);
 		m_SetIndex.EnableWindow(TRUE);
 	}
-	else
-	{
-		MessageBox(_T("保存失败，请重新修改！"), _T("提示"));
-	}	
+
 }
 
 /*取消按钮*/

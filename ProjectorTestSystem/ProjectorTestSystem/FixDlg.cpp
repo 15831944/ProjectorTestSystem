@@ -6,13 +6,14 @@
 #include "FixDlg.h"
 #include "afxdialogex.h"
 #include "ResizeCtrl.h"
-
+#include "ProjectorTestSystemDlg.h"
 // CFixDlg 对话框
 
 /*全局变量*/
 int FixFirstRow = 0;
 CFixDlg *FixDlg;
 CWindowSizeMange Fix;
+extern CProjectorTestSystemDlg *ProjectorTestSystemDlg;
 IMPLEMENT_DYNAMIC(CFixDlg, CDialogEx)
 
 CFixDlg::CFixDlg(CWnd* pParent /*=NULL*/)
@@ -61,6 +62,8 @@ void CFixDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CFixDlg, CDialogEx)
 	ON_WM_SIZE()
+	ON_BN_CLICKED(IDC_CHECK2, &CFixDlg::OnBnClickedCheck2)
+	ON_BN_CLICKED(IDC_CHECK3, &CFixDlg::OnBnClickedCheck3)
 END_MESSAGE_MAP()
 
 
@@ -99,13 +102,14 @@ BOOL CFixDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO:  在此添加专用代码和/或调用基类
 	CString FixTimeStr, m_FixBodyNumValStr, m_FixSingleBodyNumValStr, m_FixMainBoardNumValStr, mFixFuselageCode, InsertIntoSql;
-	CString mOpticalCode, SelectSqlEdit2, SelectSqlEdit1, mMainBoardCode;
+	CString mOpticalCode, SelectSqlEdit2, SelectSqlEdit1, mMainBoardCode, AfterSelectPre;
 	BOOL SelectFinhFlag = FALSE;
 	LONG FixRecodestCount = 0;
 	int m_FixBodyNumStaticValLength, m_FixSingleBodyNumStaticValLength, m_FixMainBoardNumStaticValLength;
 	int m_FixSingleBodyNumLength, m_FixMainBoardNumLength;
 	FixTimeStr = GetTime();
 	UpdateData(TRUE);
+	AfterSelectPre.Format(_T("select [TypeName] from ProjectorInformation_EncodingRules where TypeName = '%s'"), DanNum);
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
 	{
 		if (GetFocus()->GetDlgCtrlID() == IDC_FIXBODY)
@@ -121,6 +125,30 @@ BOOL CFixDlg::PreTranslateMessage(MSG* pMsg)
 					UpdateData(FALSE);
 					return CDialogEx::PreTranslateMessage(pMsg);
 				}
+				OperateDB.OpenRecordset(AfterSelectPre);
+			if (OperateDB.m_pRecordset->adoEOF)
+			{
+				MessageBox(_T("该前缀已被删除，请重新选择前缀"), _T("提示"));
+				DanNum = _T("");
+				OperateDB.CloseRecordset();
+				m_FixSingleNumEdit.SetFocus();
+				m_FixSingleBodyEditVal = "";
+				UpdateData(FALSE);
+				ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_BODYNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_SINGLEBODYNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_MAINBOARDNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_ZHIDANNUM, _T("未选择"));
+				ProjectorTestSystemDlg->m_BeforeOld.SetDlgItemText(IDC_BEFOREOLD_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_OldUp.SetDlgItemText(IDC_OLDUP_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_OldDown.SetDlgItemText(IDC_OLDDOWN_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_AfterOld.SetDlgItemText(IDC_AFTEROLD_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_BeforeBright.SetDlgItemText(IDC_BEFOREBRIGHT_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_SINGLEBODYNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Fix.SetDlgItemTextA(IDC_FIX_MAINBOARDNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Pack.SetDlgItemText(IDC_PACK_STATIC, _T("未选择"));
+				return CDialogEx::PreTranslateMessage(pMsg);
+			}
 				SelectSqlEdit1.Format(_T("SELECT * FROM ProjectorInformation_MainTable WHERE FuselageCode = '%s'and ZhiDan = '%s'"), m_FixSingleBodyEditVal,DanNum);
 				OperateDB.OpenRecordset(SelectSqlEdit1);
 				FixRecodestCount = OperateDB.GetRecordCount();
@@ -172,6 +200,29 @@ BOOL CFixDlg::PreTranslateMessage(MSG* pMsg)
 
 				try
 				{
+					OperateDB.OpenRecordset(AfterSelectPre);
+					if (OperateDB.m_pRecordset->adoEOF)
+					{
+						MessageBox(_T("该前缀已被删除，请重新选择前缀"), _T("提示"));
+						DanNum = _T("");
+						m_FixText.SetFocus();
+						m_FixTextVal = "";
+						UpdateData(FALSE);
+						ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_BODYNUM_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_SINGLEBODYNUM_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_MAINBOARDNUM_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_ZHIDANNUM, _T("未选择"));
+						ProjectorTestSystemDlg->m_BeforeOld.SetDlgItemText(IDC_BEFOREOLD_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_OldUp.SetDlgItemText(IDC_OLDUP_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_OldDown.SetDlgItemText(IDC_OLDDOWN_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_AfterOld.SetDlgItemText(IDC_AFTEROLD_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_BeforeBright.SetDlgItemText(IDC_BEFOREBRIGHT_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_SINGLEBODYNUM_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_Fix.SetDlgItemTextA(IDC_FIX_MAINBOARDNUM_STATIC, _T("未选择"));
+						ProjectorTestSystemDlg->m_Pack.SetDlgItemText(IDC_PACK_STATIC, _T("未选择"));
+						return CDialogEx::PreTranslateMessage(pMsg);
+					}
 					InsertIntoSql.Format(_T("UPDATE ProjectorInformation_MainTable SET RepairText='%s',RepairTime='%s'  WHERE FuselageCode = '%s'"), m_FixTextVal, FixTimeStr, m_FixSingleBodyEditVal);
 					OperateDB.ExecuteByConnection(InsertIntoSql);
 					m_FixList.InsertItem(FixFirstRow, m_FixSingleBodyEditVal);
@@ -217,12 +268,51 @@ BOOL CFixDlg::PreTranslateMessage(MSG* pMsg)
 		{
 			try
 			{
+				if (DanNum == "")
+				{
+					MessageBox(_T("请先配置前缀和订单号！"), _T("提示"));
+					m_AfterFixSingleEditVal = _T("");
+					UpdateData(FALSE);
+					m_AfterFixSingleEdit.SetFocus();
+					return CDialogEx::PreTranslateMessage(pMsg);
+				}
+				OperateDB.OpenRecordset(AfterSelectPre);
+				if (OperateDB.m_pRecordset->adoEOF)
+				{
+					MessageBox(_T("该前缀已被删除，请重新选择前缀"), _T("提示"));
+					DanNum = _T("");
+					m_AfterFixSingleEditVal = _T("");
+					UpdateData(FALSE);
+					m_AfterFixSingleEdit.SetFocus();
+					ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_BODYNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_SINGLEBODYNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_MAINBOARDNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_ZHIDANNUM, _T("未选择"));
+					ProjectorTestSystemDlg->m_BeforeOld.SetDlgItemText(IDC_BEFOREOLD_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_OldUp.SetDlgItemText(IDC_OLDUP_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_OldDown.SetDlgItemText(IDC_OLDDOWN_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_AfterOld.SetDlgItemText(IDC_AFTEROLD_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_BeforeBright.SetDlgItemText(IDC_BEFOREBRIGHT_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_SINGLEBODYNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Fix.SetDlgItemTextA(IDC_FIX_MAINBOARDNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Pack.SetDlgItemText(IDC_PACK_STATIC, _T("未选择"));
+					return CDialogEx::PreTranslateMessage(pMsg);
+				}
 				m_FixSingleBodyNumStaticValLength = m_FixSingleStaticVal.GetLength();
 				m_FixSingleBodyNumValStr = m_AfterFixSingleEditVal.Left(m_FixSingleBodyNumStaticValLength);
 				m_FixSingleBodyNumLength = m_AfterFixSingleEditVal.GetLength();
-				if (m_FixSingleBodyNumValStr != m_FixSingleStaticVal || m_AfterFixSingleEditVal == "" || m_FixSingleBodyNumLength>13)
+				if (m_FixSingleBodyNumValStr != m_FixSingleStaticVal || m_AfterFixSingleEditVal == "")
 				{
 					MessageBox(_T("光机码错误"), _T("提示"));
+					m_AfterFixSingleEditVal = _T("");
+					UpdateData(FALSE);
+					m_AfterFixSingleEdit.SetFocus();
+					return CDialogEx::PreTranslateMessage(pMsg);
+				}
+				if (m_FixSingleBodyNumLength > 15)
+				{
+					MessageBox(_T("光机码位数超限"), _T("提示"));
 					m_AfterFixSingleEditVal = _T("");
 					UpdateData(FALSE);
 					m_AfterFixSingleEdit.SetFocus();
@@ -283,12 +373,52 @@ BOOL CFixDlg::PreTranslateMessage(MSG* pMsg)
 		{
 			try
 			{
+				if (DanNum == "")
+				{
+					MessageBox(_T("请先配置前缀和订单号！"), _T("提示"));
+					m_AfterFixMainEditVal = _T("");
+					UpdateData(FALSE);
+					m_AfterFixMainEdit.SetFocus();
+					return CDialogEx::PreTranslateMessage(pMsg);
+				}
+				OperateDB.OpenRecordset(AfterSelectPre);
+				if (OperateDB.m_pRecordset->adoEOF)
+				{
+					MessageBox(_T("该前缀已被删除，请重新选择前缀"), _T("提示"));
+					DanNum = _T("");
+					OperateDB.CloseRecordset();
+					m_AfterFixMainEditVal = _T("");
+					UpdateData(FALSE);
+					m_AfterFixMainEdit.SetFocus();
+					ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_BODYNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_SINGLEBODYNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_MAINBOARDNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_ZHIDANNUM, _T("未选择"));
+					ProjectorTestSystemDlg->m_BeforeOld.SetDlgItemText(IDC_BEFOREOLD_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_OldUp.SetDlgItemText(IDC_OLDUP_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_OldDown.SetDlgItemText(IDC_OLDDOWN_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_AfterOld.SetDlgItemText(IDC_AFTEROLD_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_BeforeBright.SetDlgItemText(IDC_BEFOREBRIGHT_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_SINGLEBODYNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Fix.SetDlgItemTextA(IDC_FIX_MAINBOARDNUM_STATIC, _T("未选择"));
+					ProjectorTestSystemDlg->m_Pack.SetDlgItemText(IDC_PACK_STATIC, _T("未选择"));
+					return CDialogEx::PreTranslateMessage(pMsg);
+				}
 				m_FixMainBoardNumStaticValLength = m_FixMainStaticVal.GetLength();
 				m_FixMainBoardNumValStr = m_AfterFixMainEditVal.Left(m_FixMainBoardNumStaticValLength);
 				m_FixMainBoardNumLength = m_AfterFixMainEditVal.GetLength();
-				if (m_FixMainBoardNumValStr != m_FixMainStaticVal || m_AfterFixMainEditVal == "" || m_FixMainBoardNumLength>16)
+				if (m_FixMainBoardNumValStr != m_FixMainStaticVal || m_AfterFixMainEditVal == "")
 				{
 					MessageBox(_T("主板编码错误"), _T("提示"));
+					m_AfterFixMainEditVal = _T("");
+					UpdateData(FALSE);
+					m_AfterFixMainEdit.SetFocus();
+					return CDialogEx::PreTranslateMessage(pMsg);
+				}
+				if (m_FixMainBoardNumLength > 16)
+				{
+					MessageBox(_T("主板编码位数超限"), _T("提示"));
 					m_AfterFixMainEditVal = _T("");
 					UpdateData(FALSE);
 					m_AfterFixMainEdit.SetFocus();
@@ -383,5 +513,41 @@ void CFixDlg::OnSize(UINT nType, int cx, int cy)
 	if (nType == SIZE_RESTORED || nType == SIZE_MAXIMIZED)
 	{
 		Fix.ResizeWindow();
+	}
+}
+
+/*维修和光机码编辑框使能*/
+void CFixDlg::OnBnClickedCheck2()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	BOOL MainBoardNumCheck = FALSE;
+	UpdateData(TRUE);
+	MainBoardNumCheck = m_FixSingleBodyState;
+	if (MainBoardNumCheck == TRUE)
+	{
+		/*m_PloMainBoardNumEcit.EnableWindow(TRUE);*/
+	}
+	else
+	{
+		m_AfterFixSingleEdit.EnableWindow(FALSE);
+		m_AfterFixSingleEdit.SetWindowTextA(_T(""));
+	}
+}
+
+
+void CFixDlg::OnBnClickedCheck3()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	BOOL MainBoardNumCheck = FALSE;
+	UpdateData(TRUE);
+	MainBoardNumCheck = m_FixMainBoardState;
+	if (MainBoardNumCheck == TRUE)
+	{
+		/*m_PloMainBoardNumEcit.EnableWindow(TRUE);*/
+	}
+	else
+	{
+		m_AfterFixMainEdit.EnableWindow(FALSE);
+		m_AfterFixMainEdit.SetWindowTextA(_T(""));
 	}
 }

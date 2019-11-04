@@ -6,7 +6,7 @@
 #include "BefroeOldDlg.h"
 #include "afxdialogex.h"
 #include "ResizeCtrl.h"
-
+#include "ProjectorTestSystemDlg.h"
 // CBefroeOldDlg 对话框
 
 
@@ -14,7 +14,7 @@
 int BeforeOldFirstRow = 0;
 CBefroeOldDlg *BrforeOldDlg;
 CWindowSizeMange BeforeOld;
-
+extern CProjectorTestSystemDlg *ProjectorTestSystemDlg;
 
 IMPLEMENT_DYNAMIC(CBefroeOldDlg, CDialogEx)
 
@@ -69,12 +69,13 @@ BOOL CBefroeOldDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO:  在此添加专用代码和/或调用基类
 	CString BeforeOldNum, BeforeOldSelectSql, BeforeOldBodyEditStr, BeforeOldUpdateSql;
-	CString FirstBeforeTimeStr, SecondBeforeTimeStr, sTimeOneStr, sTimeTwoStr;
+	CString FirstBeforeTimeStr, SecondBeforeTimeStr, sTimeOneStr, sTimeTwoStr, AfterSelectPre;
 	_variant_t mPreAgingTestTime, mPreAgingTestTime2;
 	LONG BeforeOldRecodCount;
 	SYSTEMTIME sTimeOne;
 	int BefordOldStaticLength;
 	UpdateData(TRUE);
+	AfterSelectPre.Format(_T("select [TypeName] from ProjectorInformation_EncodingRules where TypeName = '%s'"), DanNum);
 	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_RETURN)
 	{
 		if (GetFocus()->GetDlgCtrlID() == IDC_BEFOREOLD_BODY)
@@ -85,6 +86,30 @@ BOOL CBefroeOldDlg::PreTranslateMessage(MSG* pMsg)
 				m_BeforeOldEditContrl.SetFocus();
 				m_BeforeOldBodyEdit = "";
 				UpdateData(FALSE);
+				return CDialogEx::PreTranslateMessage(pMsg);
+			}		
+			OperateDB.OpenRecordset(AfterSelectPre);
+			if (OperateDB.m_pRecordset->adoEOF)
+			{
+				MessageBox(_T("该前缀已被删除，请重新选择前缀"), _T("提示"));
+				DanNum = _T("");
+				OperateDB.CloseRecordset();
+				m_BeforeOldEditContrl.SetFocus();
+				m_BeforeOldBodyEdit = "";
+				UpdateData(FALSE);
+				ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_BODYNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_PLO_SINGLEBODYNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_MAINBOARDNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Plo.SetDlgItemText(IDC_ZHIDANNUM, _T("未选择"));
+				ProjectorTestSystemDlg->m_BeforeOld.SetDlgItemText(IDC_BEFOREOLD_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_OldUp.SetDlgItemText(IDC_OLDUP_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_OldDown.SetDlgItemText(IDC_OLDDOWN_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_AfterOld.SetDlgItemText(IDC_AFTEROLD_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_BeforeBright.SetDlgItemText(IDC_BEFOREBRIGHT_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Fix.SetDlgItemText(IDC_FIX_SINGLEBODYNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Fix.SetDlgItemTextA(IDC_FIX_MAINBOARDNUM_STATIC, _T("未选择"));
+				ProjectorTestSystemDlg->m_Pack.SetDlgItemText(IDC_PACK_STATIC, _T("未选择"));
 				return CDialogEx::PreTranslateMessage(pMsg);
 			}
 			BefordOldStaticLength = m_BeforeOldBody.GetLength();

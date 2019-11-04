@@ -533,6 +533,7 @@ void CProjectorTestSystemDlg::OnAdminiGetOn()
 		else
 		{
 			MessageBox(_T("µÇÂ¼Ê§°Ü£¬ÇëÖØÐÂµÇÂ¼"), _T("ÌáÊ¾"));
+			m_StateBar.SetPaneText(0, _T("Î´µÇÂ¼"));
 			GetOnFlag = FALSE;
 			return;
 		}
